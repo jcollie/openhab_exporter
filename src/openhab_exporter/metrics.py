@@ -19,6 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 import arrow
+import json
 
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol
