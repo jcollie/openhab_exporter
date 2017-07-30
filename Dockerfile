@@ -1,4 +1,4 @@
-# Copyright  2017 by Jeffrey C. Ollie <jeff@ocjtech.us>
+# Copyright © 2017 by Jeffrey C. Ollie <jeff@ocjtech.us>
 #
 # This file is part of OpenHAB Exporter.
 #
@@ -19,6 +19,7 @@
 FROM python:3
 MAINTAINER Jeffrey C. Ollie <jeff@ocjtech.us>
 
+ENV LANG C.UTF-8
 WORKDIR /usr/src/app
 
 COPY requirements.txt .
@@ -27,5 +28,6 @@ COPY setup.py .
 COPY src src
 RUN python setup.py install
 
+EXPOSE 9266
 
 ENTRYPOINT [ "openhab_exporter" ]
