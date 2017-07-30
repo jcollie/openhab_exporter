@@ -5,7 +5,9 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+COPY setup.py .
+COPY src src
+RUN python setup.py install
 
-COPY src/* .
 
-CMD [ "python", "cli.py" ]
+ENTRYPOINT [ "openhab_exporter" ]
