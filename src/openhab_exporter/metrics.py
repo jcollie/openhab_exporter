@@ -29,6 +29,9 @@ from twisted.web.http_headers import Headers
 from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET
 
+from twisted.web import client
+client._HTTP11ClientFactory.noisy = False
+
 class Gather(Protocol):
     def __init__(self, finished):
         self.finished = finished
@@ -90,26 +93,37 @@ class MetricsPage(Resource):
             if item['state'].lower() in ['undefined', 'uninitialized', 'null', 'undef']:
                 continue
 
+
+            if item['tags']:
+                tags = ',tags="{}"'.format(','.join(item['tags']))
+            else:
+                tags = ""
+
+            if item['groupNames']:
+                groups = ',groups="{}"'.format(','.join(item['groupNames']))
+            else:
+                groups = ""
+
             if item['type'] in ['NumberItem', 'Number']:
-                request.write('openhab_number_item{{name="{}"}} {}\n'.format(item['name'], float(item['state'])).encode('utf-8'))
+                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'])).encode('utf-8'))
 
             elif item['type'] in ['DateTimeItem', 'DateTime']:
-                request.write('openhab_datetime_item{{name="{}"}} {}\n'.format(item['name'],
+                request.write('openhab_datetime_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups,
                                                                                arrow.get(item['state'], 'YYYY-MM-DDTHH:mm:ss.SSSZ').timestamp).encode('utf-8'))
 
             elif item['type'] in ['SwitchItem', 'Switch']:
                 if item['state'].lower() == 'off':
-                    request.write('openhab_switch_item{{name="{}"}} 0\n'.format(item['name']).encode('utf-8'))
+                    request.write('openhab_switch_item{{name="{}"{}{}}} 0\n'.format(item['name'], tags, groups).encode('utf-8'))
                 elif item['state'].lower() == 'on':
-                    request.write('openhab_switch_item{{name="{}"}} 1\n'.format(item['name']).encode('utf-8'))
+                    request.write('openhab_switch_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
 
             elif item['type'] in ['DimmerItem', 'Dimmer']:
-                request.write('openhab_number_item{{name="{}"}} {}\n'.format(item['name'], float(item['state'])).encode('utf-8'))
+                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], float(item['state']), tags, groups).encode('utf-8'))
 
             elif item['type'] in ['ContactItem', 'Contact']:
                 if item['state'].lower() == 'closed':
-                    request.write('openhab_contact_item{{name="{}"}} 0\n'.format(item['name']).encode('utf-8'))
+                    request.write('openhab_contact_item{{name="{}"{}{}}} 0\n'.format(item['name'], tags, groups).encode('utf-8'))
                 elif item['state'].lower() == 'open':
-                    request.write('openhab_contact_item{{name="{}"}} 1\n'.format(item['name']).encode('utf-8'))
+                    request.write('openhab_contact_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
 
         request.finish()
