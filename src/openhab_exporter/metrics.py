@@ -118,7 +118,7 @@ class MetricsPage(Resource):
                     request.write('openhab_switch_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
 
             elif item['type'] in ['DimmerItem', 'Dimmer']:
-                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], float(item['state']), tags, groups).encode('utf-8'))
+                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'])).encode('utf-8'))
 
             elif item['type'] in ['ContactItem', 'Contact']:
                 if item['state'].lower() == 'closed':
