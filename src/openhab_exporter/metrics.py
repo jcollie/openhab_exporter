@@ -20,6 +20,7 @@
 
 import arrow
 import json
+import re
 
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol
@@ -104,8 +105,8 @@ class MetricsPage(Resource):
             else:
                 groups = ""
 
-            if item['type'] in ['NumberItem', 'Number']:
-                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'])).encode('utf-8'))
+            if re.search(r'^Number(|Item|:.+)', item['type']):
+                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'].split(' ', 1)[0])).encode('utf-8'))
 
             elif item['type'] in ['DateTimeItem', 'DateTime']:
                 request.write('openhab_datetime_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups,
