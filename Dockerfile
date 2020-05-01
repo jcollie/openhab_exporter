@@ -1,17 +1,35 @@
-FROM python:alpine as builder
+# Copyright © 2017 by Jeffrey C. Ollie <jeff@ocjtech.us>
+#
+# This file is part of OpenHAB Exporter.
+#
+# OpenHAB Exporter is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# OpenHAB Exporter is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with OpenHAB Exporter.  If not, see
+# <http://www.gnu.org/licenses/>.
 
-RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev python3-dev \
- && pip install virtualenv \
- && virtualenv /opt \
- && /opt/bin/pip install 'Twisted[tls]' arrow pyasn1
+FROM python:3-alpine
+LABEL maintainer="Jeffrey C. Ollie <jeff@ocjtech.us>"
 
-COPY src /opt/src
-COPY setup.py /opt/setup.py
-WORKDIR /opt
-RUN /opt/bin/python setup.py install
+ENV LANG C.UTF-8
 
-FROM python:alpine
-MAINTAINER Jan Grewe <jan@faked.org>
+COPY setup.py /src/setup.py
+COPY src /src/src
+
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev && \
+  pip install 'Twisted[tls]' 'arrow' && \
+  cd /src && python setup.py install && \
+  rm -rf /src && \
+  apk del gcc musl-dev libffi-dev openssl-dev
+
 EXPOSE 9266
-COPY --from=builder /opt /opt
-ENTRYPOINT ["/opt/bin/openhab_exporter"]
+
+ENTRYPOINT ["openhab_exporter"]
