@@ -24,11 +24,11 @@ ENV LANG C.UTF-8
 COPY setup.py /src/setup.py
 COPY src /src/src
 
-RUN apk add --no-cache alpine-sdk libffi-dev openssl-dev && \
-	pip install 'Twisted[tls]' 'arrow' && \
-	cd /src && python setup.py install && \
-	rm -rf /src && \
-	apk del alpine-sdk
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev && \
+  pip install 'Twisted[tls]' 'arrow' && \
+  cd /src && python setup.py install && \
+  rm -rf /src && \
+  apk del gcc musl-dev libffi-dev openssl-dev
 
 EXPOSE 9266
 
